@@ -63,4 +63,25 @@ describe Resugan::Worker do
       monitor.send(:eval_queue)
     end
   end
+
+  context "configuration" do
+    it "allows an error handler to be specified" do
+      monitor = Resugan::Worker::Monitor.new('namespace1').configure do |config|
+        config.error_handler = -> (namespace, event, args, exception) {
+          expect(namespace).to eq "namespace1"
+          expect(exception.message).to eq "error"
+        }
+      end
+
+      _listener :event1, namespace: 'namespace1' do |params|
+        raise "error"
+      end
+
+      resugan 'namespace1' do
+        _fire :event1
+      end
+
+      monitor.send(:eval_queue)
+    end
+  end
 end

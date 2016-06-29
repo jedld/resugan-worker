@@ -7,10 +7,20 @@ require "json"
 
 module Resugan
   module Worker
+    class Config
+      attr_accessor :error_handler
+    end
+
     class Monitor
       def initialize(namespace = '')
         @namespace = namespace
+        @config = Config.new
         @queue = ParallelQueue.new(redis, 'resugan_queue-' + namespace)
+      end
+
+      def configure(&block)
+        block.call(@config)
+        self
       end
 
       def start
@@ -40,7 +50,13 @@ module Resugan
           event = unmarshalled_event["event"]
           args = unmarshalled_event["args"]
 
-          Resugan::Kernel.invoke(@namespace, event, args)
+          begin
+            Resugan::Kernel.invoke(@namespace, event, args)
+          rescue StandardError => exception
+            if @config.error_handler
+              @config.error_handler.call(@namespace, event, args, exception)
+            end
+          end
         end
       end
     end

@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/resugan-worker.svg)](https://badge.fury.io/rb/resugan-worker) [![CircleCI](https://circleci.com/gh/jedld/resugan-worker.svg?style=svg)](https://circleci.com/gh/jedld/resugan-worker)
+
 # Resugan::Worker
 
 Background worker extension to the resugan gem. Uses redis and parallel_queue
@@ -62,6 +64,20 @@ Firing events is the same, but the event generators can be in another process or
 resugan {
   _fire :hello
 }
+```
+
+## Error and exception handling
+
+If you want to handle exceptions showing up in a listener, you can define a handler that gets called
+when something bad happens.
+
+```ruby
+   monitor = Resugan::Worker::Monitor.new
+   monitor.configure do |config|
+     config.error_handler = ->(namespace, event, args, exception) {
+       puts exception.backtrace
+     }
+   end
 ```
 
 ## Development
