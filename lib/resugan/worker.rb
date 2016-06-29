@@ -28,12 +28,16 @@ module Resugan
 
         ::Kernel.loop do
           eval_queue
-          sleep 1
+          sleep 1 if @queue.queue_count == 0
         end
       end
 
       def redis=(redis)
         @redis = redis
+      end
+
+      def reset_queue
+        @queue.delete_all!
       end
 
       protected
