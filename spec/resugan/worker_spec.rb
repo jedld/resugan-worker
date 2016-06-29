@@ -67,7 +67,7 @@ describe Resugan::Worker do
   context "configuration" do
     it "allows an error handler to be specified" do
       monitor = Resugan::Worker::Monitor.new('namespace1').configure do |config|
-        config.error_handler = -> (namespace, event, args, exception) {
+        config.error_handler = Proc.new { |namespace, event, args, exception|
           expect(namespace).to eq "namespace1"
           expect(exception.message).to eq "error"
         }
